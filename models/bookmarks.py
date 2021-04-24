@@ -15,7 +15,7 @@ class Bookmarks:
 
     @property
     def last_updated_str(self) -> str:
-        return f"{self.last_updated.isoformat()}Z"
+        return self.last_updated.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
