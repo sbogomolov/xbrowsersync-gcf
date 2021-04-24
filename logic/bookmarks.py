@@ -23,6 +23,24 @@ def post_bookmarks(request: Request) -> ResponseType:
     return {"id": bookmarks.id_, "lastUpdated": bookmarks.last_updated_str, "version": bookmarks.version}
 
 
+def get_bookmarks(id_: str) -> ResponseType:
+    doc = get_document(id_).get()
+    if not doc.exists:
+        return not_found()
+
+    bookmarks = Bookmarks.from_dict(doc.to_dict())
+    return {"bookmarks": bookmarks.bookmarks, "lastUpdated": bookmarks.last_updated_str, "version": bookmarks.version}
+
+
+def get_bookmarks_last_updated(id_: str) -> ResponseType:
+    doc = get_document(id_).get()
+    if not doc.exists:
+        return not_found()
+
+    bookmarks = Bookmarks.from_dict(doc.to_dict())
+    return {"lastUpdated": bookmarks.last_updated_str}
+
+
 def get_bookmarks_version(id_: str) -> ResponseType:
     doc = get_document(id_).get()
     if not doc.exists:
