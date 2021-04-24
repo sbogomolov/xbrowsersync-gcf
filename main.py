@@ -11,7 +11,7 @@ VERSION = "1.1.13"
 runtime_config_client = runtimeconfig.Client()
 config = runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
 accept_new_syncs = config.get_variable("accept_new_syncs")
-ACCEPT_NEW_SYNCS = True if accept_new_syncs and accept_new_syncs.lower() == "true" else False
+ACCEPT_NEW_SYNCS = True if accept_new_syncs and accept_new_syncs.text.lower() == "true" else False
 
 firebase_admin.initialize_app()
 db = firestore.client()
