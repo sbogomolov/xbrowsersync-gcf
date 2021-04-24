@@ -6,7 +6,7 @@ from os import environ
 from typing import List
 import firebase_admin
 
-from bookmarks import Bookmarks
+from models.bookmarks import Bookmarks
 
 
 VERSION = "1.1.13"
