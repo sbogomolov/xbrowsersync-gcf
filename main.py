@@ -6,8 +6,11 @@ from os import environ
 from typing import List
 import firebase_admin
 
+from bookmarks import Bookmarks
+
 
 VERSION = "1.1.13"
+COLLECTION = "bookmarks"
 
 runtime_config_client = runtimeconfig.Client()
 config = runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
@@ -26,9 +29,31 @@ def method_not_allowed(allowed_methods: List[str]) -> Response:
     return Response(status=HTTPStatus.METHOD_NOT_ALLOWED, headers=headers)
 
 
+def bad_request(text: str) -> Response:
+    return Response(text, status=HTTPStatus.BAD_REQUEST)
+
+
 def info(request: Request):
     if request.method != "GET":
         return method_not_allowed(["GET"])
 
     status = 1 if accept_new_syncs() else 3
     return {"location": "", "maxSyncSize": 512000, "message": "", "status": status, "version": VERSION}
+
+
+def bookmarks(request: Request):
+    if request.method != "POST":
+        return method_not_allowed(["POST"])
+
+    request_json = request.get_json(silent=True)
+    if not request_json:
+        return bad_request("Request body is empty")
+
+    version = request_json.get("version")
+    if not version:
+        return bad_request('"version" is not provided')
+
+    bookmarks = Bookmarks(version=version)
+    db.collection(COLLECTION).document(bookmarks.id_).set(bookmarks.to_dict())
+
+    return {"id": bookmarks.id_, "lastUpdated": bookmarks.last_updated_str, "version": bookmarks.version}
