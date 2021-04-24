@@ -3,13 +3,15 @@ from datetime import datetime
 from typing import Any, Dict
 from uuid import uuid4
 
+from common.utils import now
+
 
 @dataclass
 class Bookmarks:
     version: str
     id_: str = uuid4().hex
     bookmarks: str = ""
-    last_updated: datetime = datetime.now()
+    last_updated: datetime = now()
 
     @property
     def last_updated_str(self) -> str:

@@ -1,9 +1,15 @@
 from flask import Request
 import re
 
-from logic.bookmarks import get_bookmarks, get_bookmarks_last_updated, get_bookmarks_version, post_bookmarks
+from logic.bookmarks import (
+    get_bookmarks,
+    get_bookmarks_last_updated,
+    get_bookmarks_version,
+    post_bookmarks,
+    put_bookmarks,
+)
 from logic.info import get_info
-from logic.utils import method_not_allowed, not_found
+from common.utils import method_not_allowed, not_found
 
 
 def info(request: Request):
@@ -24,7 +30,7 @@ def bookmarks(request: Request):
             if request.method == "GET":
                 return get_bookmarks(match[1])
             elif request.method == "PUT":
-                return not_found()
+                return put_bookmarks(match[1], request)
             else:
                 return method_not_allowed(["GET", "PUT"])
 
