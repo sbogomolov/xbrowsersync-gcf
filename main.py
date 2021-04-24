@@ -1,5 +1,5 @@
 from firebase_admin import firestore
-from flask import Request
+from flask import Response, Request
 from google.cloud import runtimeconfig
 from os import environ
 from typing import Any, Dict
@@ -21,6 +21,9 @@ def accept_new_syncs() -> bool:
 
 
 def info(request: Request) -> Dict[str, Any]:
+    if request.method != "GET":
+        return Response(status=405)
+
     status = 1 if accept_new_syncs() else 3
     return {
         "location": "",
