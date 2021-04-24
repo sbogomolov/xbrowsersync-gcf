@@ -28,4 +28,5 @@ def get_bookmarks_version(id_: str) -> ResponseType:
     if not doc.exists:
         return not_found()
 
-    return {"version": doc.version}
+    bookmarks = Bookmarks.from_dict(doc.to_dict())
+    return {"version": bookmarks.version}
