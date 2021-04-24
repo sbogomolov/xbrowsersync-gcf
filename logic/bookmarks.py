@@ -1,7 +1,7 @@
 from flask import Response, Request
 from typing import Any, Dict, Union
 
-from logic.utils import bad_request, get_document
+from logic.utils import bad_request, get_document, not_found
 from models.bookmarks import Bookmarks
 
 
@@ -26,6 +26,6 @@ def post_bookmarks(request: Request) -> ResponseType:
 def get_bookmarks_version(id_: str) -> ResponseType:
     doc = get_document(id_).get()
     if not doc.exists:
-        return bad_request(f'Bookmarks sync with id "{id_}" does not exist')
+        return not_found()
 
     return {"version": doc.version}

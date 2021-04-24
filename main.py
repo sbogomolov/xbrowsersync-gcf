@@ -14,8 +14,6 @@ def info(request: Request):
 
 def bookmarks(request: Request):
     path = request.path.rstrip("/")
-    return path
-
     if not path:
         if request.method != "POST":
             return method_not_allowed(["POST"])
@@ -24,7 +22,7 @@ def bookmarks(request: Request):
         # match = re.match(r"/(\w+)$", path)
         # if match:
         #     pass
-        match = re.match(r"/(\w+)$/version", path)
+        match = re.match(r"/(\w+)/version$", path)
         if match:
             if request.method != "GET":
                 return method_not_allowed(["GET"])
