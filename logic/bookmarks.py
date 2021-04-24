@@ -47,7 +47,8 @@ def put_bookmarks(id_: str, request: Request) -> ResponseType:
     if not bookmarks:
         return bad_request('"bookmarks" is not provided')
 
-    doc = get_document(id_).get()
+    doc_ref = get_document(id_)
+    doc = doc_ref.get()
     if not doc.exists:
         return not_found()
 
@@ -57,7 +58,7 @@ def put_bookmarks(id_: str, request: Request) -> ResponseType:
 
     bookmarks_doc.bookmarks = bookmarks
     bookmarks_doc.last_updated = now()
-    doc.set(bookmarks_doc.to_dict())
+    doc_ref.set(bookmarks_doc.to_dict())
 
     return {"lastUpdated": bookmarks_doc.last_updated_str}
 
