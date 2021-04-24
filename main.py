@@ -14,6 +14,8 @@ def info(request: Request):
 
 def bookmarks(request: Request):
     path = request.path.rstrip("/")
+    return path
+
     if not path:
         if request.method != "POST":
             return method_not_allowed(["POST"])
