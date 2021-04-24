@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from firebase_admin import firestore
 from flask import Response, Request
 from google.cloud import runtimeconfig
@@ -22,7 +23,7 @@ def accept_new_syncs() -> bool:
 
 def info(request: Request) -> Dict[str, Any]:
     if request.method != "GET":
-        return Response(status=405)
+        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
 
     status = 1 if accept_new_syncs() else 3
     return {
