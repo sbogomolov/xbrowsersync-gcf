@@ -1,6 +1,7 @@
-from firebase_admin import DocumentReference, firestore
+from firebase_admin import firestore
 from flask import Response
 from google.cloud import runtimeconfig
+from google.cloud.firestore import DocumentReference
 from http import HTTPStatus
 from os import environ
 from typing import List
