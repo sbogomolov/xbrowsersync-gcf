@@ -1,0 +1,35 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-json
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 19.3b0
+    hooks:
+    -   id: black
+        exclude: ^migrations/
+        args: [--line-length=120]
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.812
+    hooks:
+    -   id: mypy
+        args: [--no-strict-optional, --ignore-missing-imports]
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.4
+    hooks:
+    -   id: flake8
+        additional_dependencies: [pep8-naming]
+        args: ["--select=F401,N801,N802,N803,N804,N805,N807"]
+# -   repo: local
+#     hooks:
+#     -   id: pytest
+#         name: pytest
+#         entry: bash -c "pytest -n auto --cov=app --cov-fail-under=85"
+#         language: system
+#         always_run: true
+#         pass_filenames: false

@@ -1,0 +1,4 @@
+.gcloudignore
+.git
+.gitignore
+.pre-commit-config.yaml

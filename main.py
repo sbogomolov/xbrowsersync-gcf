@@ -3,7 +3,7 @@ from firebase_admin import firestore
 from flask import Response, Request
 from google.cloud import runtimeconfig
 from os import environ
-from typing import Any, Dict, List, Tuple
+from typing import List
 import firebase_admin
 
 
@@ -21,26 +21,14 @@ def accept_new_syncs() -> bool:
     return True if accept_new_syncs and accept_new_syncs.text.lower() == "true" else False
 
 
-def method_not_allowed(allowed_methods: List[str]) -> Tuple[str, int, Dict[str, str]]:
-    headers = {
-        "Allow": ", ".join(allowed_methods),
-    }
-    return (
-        HTTPStatus.METHOD_NOT_ALLOWED.phrase,
-        HTTPStatus.METHOD_NOT_ALLOWED.value,
-        headers,
-    )
+def method_not_allowed(allowed_methods: List[str]) -> Response:
+    headers = {"Allow": ", ".join(allowed_methods)}
+    return Response(status=HTTPStatus.METHOD_NOT_ALLOWED, headers=headers)
 
 
-def info(request: Request) -> Dict[str, Any]:
+def info(request: Request):
     if request.method != "GET":
         return method_not_allowed(["GET"])
 
     status = 1 if accept_new_syncs() else 3
-    return {
-        "location": "",
-        "maxSyncSize": 512000,
-        "message": "",
-        "status": status,
-        "version": VERSION,
-    }
+    return {"location": "", "maxSyncSize": 512000, "message": "", "status": status, "version": VERSION}
