@@ -10,15 +10,18 @@ VERSION = "1.1.13"
 
 runtime_config_client = runtimeconfig.Client()
 config = runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
-accept_new_syncs = config.get_variable("accept_new_syncs")
-ACCEPT_NEW_SYNCS = True if accept_new_syncs and accept_new_syncs.text.lower() == "true" else False
 
 firebase_admin.initialize_app()
 db = firestore.client()
 
 
+def accept_new_syncs() -> bool:
+    accept_new_syncs = config.get_variable("accept_new_syncs")
+    return True if accept_new_syncs and accept_new_syncs.text.lower() == "true" else False
+
+
 def info(request: Request) -> Dict[str, Any]:
-    status = 1 if ACCEPT_NEW_SYNCS else 3
+    status = 1 if accept_new_syncs() else 3
     return {
         "location": "",
         "maxSyncSize": 512000,
