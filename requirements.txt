@@ -1,2 +1,3 @@
 firebase-admin
 flask
+google-cloud-runtimeconfig
