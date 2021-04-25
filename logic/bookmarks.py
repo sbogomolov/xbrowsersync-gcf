@@ -2,7 +2,7 @@ from dateutil import parser
 from flask import Response, Request
 from typing import Any, Dict, Union
 
-from common.utils import bad_request, get_document, not_found, now
+from common.utils import accept_new_syncs, bad_request, get_document, not_found, now
 from models.bookmarks import Bookmarks
 
 
@@ -10,6 +10,9 @@ ResponseType = Union[Response, Dict[str, Any]]
 
 
 def post_bookmarks(request: Request) -> ResponseType:
+    if not accept_new_syncs():
+        return bad_request("Server is not accepting new syncs")
+
     request_json = request.get_json(silent=True)
     if not request_json:
         return bad_request("Request body is empty")
