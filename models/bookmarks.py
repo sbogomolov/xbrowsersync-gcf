@@ -1,17 +1,16 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any, Dict
-from uuid import uuid4
 
-from common.utils import now
+from common.utils import new_id, now
 
 
 @dataclass
 class Bookmarks:
     version: str
-    id_: str = uuid4().hex
+    id_: str = field(default_factory=new_id)
     bookmarks: str = ""
-    last_updated: datetime = now()
+    last_updated: datetime = field(default_factory=now)
 
     @property
     def last_updated_str(self) -> str:

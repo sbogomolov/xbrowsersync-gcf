@@ -7,6 +7,7 @@ from google.cloud.firestore import DocumentReference
 from http import HTTPStatus
 from os import environ
 from typing import List
+from uuid import uuid4
 import firebase_admin
 
 
@@ -44,3 +45,7 @@ def bad_request(text: str) -> Response:
 
 def now() -> datetime:
     return datetime.utcnow().replace(tzinfo=tz.UTC)
+
+
+def new_id() -> str:
+    return uuid4().hex
