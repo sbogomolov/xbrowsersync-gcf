@@ -34,19 +34,6 @@ def get_document(id_: str) -> DocumentReference:
     return db.collection(COLLECTION).document(id_)
 
 
-def method_not_allowed(allowed_methods: List[str]) -> Response:
-    headers = {"Allow": ", ".join(allowed_methods)}
-    return Response(status=HTTPStatus.METHOD_NOT_ALLOWED, headers=headers)
-
-
-def not_found() -> Response:
-    return Response(status=HTTPStatus.NOT_FOUND)
-
-
-def bad_request(text: str) -> Response:
-    return Response(text, status=HTTPStatus.BAD_REQUEST)
-
-
 def now() -> datetime:
     return datetime.utcnow().replace(tzinfo=timezone.utc)
 
@@ -63,3 +50,16 @@ def parse_request(request: Request, model_type: Type[T]) -> T:
         return model_type(**request_json)
     except ValidationError as e:
         raise BadRequestException(f"Bad request: {e}")
+
+
+def method_not_allowed(allowed_methods: List[str]) -> Response:
+    headers = {"Allow": ", ".join(allowed_methods)}
+    return Response(status=HTTPStatus.METHOD_NOT_ALLOWED, headers=headers)
+
+
+def not_found() -> Response:
+    return Response(status=HTTPStatus.NOT_FOUND)
+
+
+def bad_request(text: str) -> Response:
+    return Response(f"{text}\n", status=HTTPStatus.BAD_REQUEST)
