@@ -1,84 +1,65 @@
-from dateutil import parser
-from flask import Response, Request
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
-from common.utils import accept_new_syncs, bad_request, get_document, not_found, now
-from models.bookmarks import Bookmarks
-
-
-ResponseType = Union[Response, Dict[str, Any]]
+from common.utils import accept_new_syncs, get_document, new_id, now
+from common.exceptions import BadRequestException, NotFoundException
+from models.bookmarks import BookmarksModel, BookmarksPatch, Version
 
 
-def post_bookmarks(request: Request) -> ResponseType:
+def post_bookmarks(version: Version) -> Dict[str, Any]:
     if not accept_new_syncs():
-        return bad_request("Server is not accepting new syncs")
+        raise BadRequestException("Server is not accepting new syncs")
 
-    request_json = request.get_json(silent=True)
-    if not request_json:
-        return bad_request("Request body is empty")
+    bookmarks = BookmarksModel(id_=new_id(), bookmarks="", last_updated=now(), version=version.version)
+    get_document(bookmarks.id_).set(bookmarks.dict())
 
-    version = request_json.get("version")
-    if not version:
-        return bad_request('"version" is not provided')
-
-    bookmarks_doc = Bookmarks(version=version)
-    get_document(bookmarks_doc.id_).set(bookmarks_doc.to_dict())
-
-    return {"id": bookmarks_doc.id_, "lastUpdated": bookmarks_doc.last_updated_str, "version": bookmarks_doc.version}
+    return {"id": bookmarks.id_, "lastUpdated": bookmarks.last_updated.isoformat(), "version": bookmarks.version}
 
 
-def get_bookmarks(id_: str) -> ResponseType:
+def get_bookmarks(id_: str) -> Dict[str, Any]:
     doc = get_document(id_).get()
     if not doc.exists:
-        return not_found()
+        raise NotFoundException()
 
-    bookmarks = Bookmarks.from_dict(doc.to_dict())
-    return {"bookmarks": bookmarks.bookmarks, "lastUpdated": bookmarks.last_updated_str, "version": bookmarks.version}
+    bookmarks = BookmarksModel(**doc.to_dict())
+    return {
+        "bookmarks": bookmarks.bookmarks,
+        "lastUpdated": bookmarks.last_updated.isoformat(),
+        "version": bookmarks.version,
+    }
 
 
-def put_bookmarks(id_: str, request: Request) -> ResponseType:
-    request_json = request.get_json(silent=True)
-    if not request_json:
-        return bad_request("Request body is empty")
-
-    last_updated_str = request_json.get("lastUpdated")
-    if not last_updated_str:
-        return bad_request('"lastUpdated" is not provided')
-    last_updated = parser.isoparse(last_updated_str)
-
-    bookmarks = request_json.get("bookmarks")
-    if not bookmarks:
-        return bad_request('"bookmarks" is not provided')
-
+def put_bookmarks(id_: str, bookmarks_patch: BookmarksPatch) -> Dict[str, Any]:
     doc_ref = get_document(id_)
     doc = doc_ref.get()
     if not doc.exists:
-        return not_found()
+        raise NotFoundException()
 
-    bookmarks_doc = Bookmarks.from_dict(doc.to_dict())
-    if bookmarks_doc.last_updated != last_updated:
-        return bad_request(f"lastUpdated does not match: {last_updated_str} != {bookmarks_doc.last_updated_str}")
+    bookmarks = BookmarksModel(**doc.to_dict())
+    if bookmarks.last_updated != bookmarks_patch.last_updated:
+        raise BadRequestException(
+            f"lastUpdated does not match: {bookmarks_patch.last_updated.isoformat()} != {bookmarks.last_updated.isoformat()}"
+        )
 
-    bookmarks_doc.bookmarks = bookmarks
-    bookmarks_doc.last_updated = now()
-    doc_ref.set(bookmarks_doc.to_dict())
+    bookmarks.bookmarks = bookmarks_patch.bookmarks
+    bookmarks.last_updated = now()
+    doc_ref.set(bookmarks.dict())
 
-    return {"lastUpdated": bookmarks_doc.last_updated_str}
+    return {"lastUpdated": bookmarks.last_updated.isoformat()}
 
 
-def get_bookmarks_last_updated(id_: str) -> ResponseType:
+def get_bookmarks_last_updated(id_: str) -> Dict[str, Any]:
     doc = get_document(id_).get()
     if not doc.exists:
-        return not_found()
+        raise NotFoundException()
 
-    bookmarks = Bookmarks.from_dict(doc.to_dict())
-    return {"lastUpdated": bookmarks.last_updated_str}
+    bookmarks = BookmarksModel(**doc.to_dict())
+    return {"lastUpdated": bookmarks.last_updated.isoformat()}
 
 
-def get_bookmarks_version(id_: str) -> ResponseType:
+def get_bookmarks_version(id_: str) -> Dict[str, Any]:
     doc = get_document(id_).get()
     if not doc.exists:
-        return not_found()
+        raise NotFoundException()
 
-    bookmarks_doc = Bookmarks.from_dict(doc.to_dict())
-    return {"version": bookmarks_doc.version}
+    bookmarks = BookmarksModel(**doc.to_dict())
+    return {"version": bookmarks.version}

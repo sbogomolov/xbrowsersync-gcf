@@ -1,24 +1,18 @@
-from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, Dict
-
-from common.utils import new_id, now
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class Bookmarks:
+class Version(BaseModel):
     version: str
-    id_: str = field(default_factory=new_id)
-    bookmarks: str = ""
-    last_updated: datetime = field(default_factory=now)
 
-    @property
-    def last_updated_str(self) -> str:
-        return self.last_updated.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+class BookmarksPatch(BaseModel):
+    bookmarks: str
+    last_updated: datetime = Field(..., alias="lastUpdated")
 
-    @staticmethod
-    def from_dict(data: Dict[str, Any]):
-        return Bookmarks(**data)
+
+class BookmarksModel(BookmarksPatch, Version):
+    id_: str
+
+    class Config:
+        allow_population_by_field_name = True

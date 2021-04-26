@@ -1,14 +1,16 @@
-from datetime import datetime
-from dateutil import tz
+from datetime import datetime, timezone
 from firebase_admin import firestore
-from flask import Response
+from flask import Response, Request
 from google.cloud import runtimeconfig
 from google.cloud.firestore import DocumentReference
 from http import HTTPStatus
 from os import environ
-from typing import List
+from pydantic import BaseModel, ValidationError
+from typing import List, Type, TypeVar
 from uuid import uuid4
 import firebase_admin
+
+from common.exceptions import BadRequestException
 
 
 VERSION = "1.1.13"
@@ -19,6 +21,8 @@ config = runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
 
 firebase_admin.initialize_app()
 db = firestore.client()
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def accept_new_syncs() -> bool:
@@ -44,8 +48,18 @@ def bad_request(text: str) -> Response:
 
 
 def now() -> datetime:
-    return datetime.utcnow().replace(tzinfo=tz.UTC)
+    return datetime.utcnow().replace(tzinfo=timezone.utc)
 
 
 def new_id() -> str:
     return uuid4().hex
+
+
+def parse_request(request: Request, model_type: Type[T]) -> T:
+    request_json = request.get_json(silent=True)
+    if not request_json:
+        raise BadRequestException("Request body is not a valid JSON")
+    try:
+        return model_type(**request_json)
+    except ValidationError as e:
+        raise BadRequestException(f"Bad request: {e}")
