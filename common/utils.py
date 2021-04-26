@@ -3,7 +3,9 @@ from firebase_admin import firestore
 from flask import Response, Request
 from functools import cache
 from google.cloud import runtimeconfig
+from google.cloud.firestore import Client as FirestoreClient
 from google.cloud.firestore import DocumentReference
+from google.cloud.runtimeconfig.config import Config
 from http import HTTPStatus
 from os import environ
 from pydantic import BaseModel, ValidationError
@@ -63,12 +65,12 @@ def bad_request(text: str) -> Response:
 
 
 @cache
-def _get_runtime_config():
+def _get_runtime_config() -> Config:
     runtime_config_client = runtimeconfig.Client()
     return runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
 
 
 @cache
-def _get_firestore_client():
+def _get_firestore_client() -> FirestoreClient:
     firebase_admin.initialize_app()
     return firestore.client()
