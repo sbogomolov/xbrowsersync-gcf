@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from firebase_admin import firestore
 from flask import Response, Request
+from functools import cache
 from google.cloud import runtimeconfig
 from google.cloud.firestore import DocumentReference
 from http import HTTPStatus
@@ -16,21 +17,17 @@ from common.exceptions import BadRequestException
 VERSION = "1.1.13"
 COLLECTION = "bookmarks"
 
-runtime_config_client = runtimeconfig.Client()
-config = runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
-
-firebase_admin.initialize_app()
-db = firestore.client()
-
 T = TypeVar("T", bound=BaseModel)
 
 
 def accept_new_syncs() -> bool:
+    config = _get_runtime_config()
     accept_new_syncs = config.get_variable("accept_new_syncs")
     return True if accept_new_syncs and accept_new_syncs.text.lower() == "true" else False
 
 
 def get_document(id_: str) -> DocumentReference:
+    db = _get_firestore_client()
     return db.collection(COLLECTION).document(id_)
 
 
@@ -63,3 +60,15 @@ def not_found() -> Response:
 
 def bad_request(text: str) -> Response:
     return Response(f"{text}\n", status=HTTPStatus.BAD_REQUEST)
+
+
+@cache
+def _get_runtime_config():
+    runtime_config_client = runtimeconfig.Client()
+    return runtime_config_client.config(environ.get("RUNTIME_CONFIG_NAME"))
+
+
+@cache
+def _get_firestore_client():
+    firebase_admin.initialize_app()
+    return firestore.client()
